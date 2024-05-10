@@ -12,12 +12,14 @@ import TimelineSection from '../components/core/HomePage/TimelineSection'
 import LearningLanguageSection from '../components/core/HomePage/LearningLanguageSection'
 import InstructorSection from '../components/core/HomePage/InstructorSection'
 import ReviewSlider from '../components/common/ReviewSlider'
+import todoblueimg from '../assets/Images/moving_todolistblue.gif'
 // import Footer from '../components/common/Footer'
 // import ExploreMore from '../components/core/HomePage/ExploreMore'
 
 
 const Home = () => {
   return (
+    
     <div>
       {/*Section1  */}
       <div className='relative mx-auto flex flex-col w-11/12 max-w-maxContent items-center 
@@ -80,6 +82,7 @@ const Home = () => {
                 subheading = {
                     "We Are What We Repeatedly Do. Excellence Is Not An Act, But a Habit. You Don't Have To Be Great To Start, But You Have To Start To Be Great."
                 }
+                
                 ctabtn1={
                     {
                         btnText: "Try It Yourself",
@@ -94,12 +97,15 @@ const Home = () => {
                         active: false,
                     }
                 }
-
+                    
                 codeblock={`Maximize your productivity with our app interface.\nStay organized with task prioritization tools.\nTrack your progress with insightful analytics and reports.\nEffortlessly manage your workload with easy-to-use features.\nStay motivated with personalized goal-setting capabilities.\nAchieve work-life balance with time management tools.\nAccess your tasks anytime, anywhere with cross-device syncing.`}
                 codeColor={"text-yellow-25"}
-            />
-        </div>
 
+                
+
+            />
+            {/* <img src={todoblueimg} alt="" /> */}
+        </div>
                 {/* Code Section 2 */}
         <div>
             <CodeBlocks 
@@ -129,9 +135,9 @@ const Home = () => {
                     }
                 }
 
-                codeblock={`<<!DOCTYPE html>\n<html>\nhead><title>Example</title><linkrel="stylesheet"href="styles.css">\n/head>\n`}
-                codeColor={"text-yellow-25"}
             />
+
+           
         </div>
 
       </div>

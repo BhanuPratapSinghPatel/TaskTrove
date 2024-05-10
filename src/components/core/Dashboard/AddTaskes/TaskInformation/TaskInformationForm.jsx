@@ -11,7 +11,7 @@ import { setStep, setTask } from '../../../../../slices/TaskSlice';
 import IconBtn from '../../../../common/IconBtn';
 import { TASK_STATUS } from '../../../../../utils/constants';
 import { toast } from 'react-hot-toast';
-
+import bubbleimage from '../../../../../assets/Images/3d-glassy-spheric-vortex-of-pastel-light.gif'
 const TaskInformationForm = () => {
 
     const {
@@ -139,11 +139,14 @@ const TaskInformationForm = () => {
     }
 
     return (
+<div className=''> <img src={bubbleimage} alt=""  className=' absolute z-0 translate-x-96 -translate-y-9'/>
         <form
             onSubmit={handleSubmit(onSubmit)}
 
-            className="space-y-8 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6"
+            className=" relative  space-y-8 rounded-md  border-richblack-700 bg-richblack-800 p-6  backdrop-blur-sm bg-white/30"
+
         >
+           
 
             <div className="flex flex-col space-y-2">
                 <label className="text-sm text-richblack-5" htmlFor='taskTitle'>Task Title<sup>*</sup></label>
@@ -294,6 +297,7 @@ const TaskInformationForm = () => {
 
             </div>
         </form>
+        </div>
     )
 }
 

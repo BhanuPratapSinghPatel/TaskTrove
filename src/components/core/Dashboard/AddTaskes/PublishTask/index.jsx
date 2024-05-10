@@ -7,7 +7,7 @@ import { editTaskDetails } from "../../../../../services/operations/taskDetailsA
 import { resetTaskState,setStep } from "../../../../../slices/TaskSlice"
 import { TASK_STATUS } from "../../../../../utils/constants"
 import IconBtn from "../../../../common/IconBtn"
-
+import lapmimage from "../../../../../assets/Images/dizzy-lamp-2.gif"
 export default function PublishTask() {
   const { register, handleSubmit, setValue, getValues } = useForm()
 
@@ -95,6 +95,7 @@ export default function PublishTask() {
           </button>
           <IconBtn disabled={loading} text="Save Changes" />
         </div>
+        <div className=" absolute -translate-y-1/3 translate-x-[700px]"><img src={lapmimage} alt="" /></div>
       </form>
     </div>
   )

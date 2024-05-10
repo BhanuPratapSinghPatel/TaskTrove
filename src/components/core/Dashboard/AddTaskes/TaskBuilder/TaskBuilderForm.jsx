@@ -82,8 +82,8 @@ export default function TaskBuilderForm() {
     dispatch(setEditTask(true))
   }
   return (
-    <div className="space-y-8 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6">
-      <p className="text-2xl font-semibold text-richblack-5">Task Builder</p>
+    <div className="space-y-8 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6  backdrop-blur-xl bg-richblack-700/30">
+      <p className="text-2xl font-semibold text-richblack-500">Task Builder</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex flex-col space-y-2">
           <label className="text-sm text-richblack-5" htmlFor="sectionName">

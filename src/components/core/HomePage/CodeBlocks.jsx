@@ -3,9 +3,9 @@ import CTAButton from "../HomePage/Button"
 // import HighlightText from './HighlightText'
 import {FaArrowRight} from "react-icons/fa"
 import { TypeAnimation } from 'react-type-animation'
-
+import todolistblue from "../../../assets/Images/moving_todolistblue.gif"
 const CodeBlocks = ({
-    position, heading, subheading, ctabtn1, ctabtn2, codeblock, backgroudGradient, codeColor
+    position, heading, subheading, ctabtn1, ctabtn2, codeblock, backgroudGradient, codeColor,image
 }) => {
   return (
     <div className={`flex ${position} my-20 justify-between gap-10`}>
@@ -49,6 +49,7 @@ const CodeBlocks = ({
             <p>9</p>
             <p>10</p>
             <p>11</p>
+           
         </div>
 
         <div className={`w-[90%] flex flex-col gap-2 font-bold font-mono ${codeColor} pr-2`}>
