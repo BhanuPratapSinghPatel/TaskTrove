@@ -43,7 +43,7 @@ const Home = () => {
         </div>
 
         <div className=' mt-4 w-[90%] text-center text-lg font-bold text-richblack-300'>
-           Acquire A Comprehensive Platform To Track Day-To-Day Tasks, Set Personalized Challenges, And Build A Supportive Community. Changes done by KJ
+           Acquire A Comprehensive Platform To Track Day-To-Day Tasks, Set Personalized Challenges, And Build A Supportive Community.
         </div>
 
         <div className='flex flex-row gap-7 mt-8'>
