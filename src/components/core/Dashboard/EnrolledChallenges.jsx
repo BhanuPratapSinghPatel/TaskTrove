@@ -3,9 +3,15 @@ import { useSelector } from 'react-redux'
 import { getUserEnrolledChallenges } from '../../../services/operations/profileAPI';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { useNavigate } from 'react-router-dom'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css';
+
+
 
 const EnrolledChallenges = () => {
-
+  const TileContent=({ activeStartDate, date, view }) => view === 'month' && date.getDay() === 0 ? <p>🏅</p> : null
+    
+  
   const { token } = useSelector((state) => state.auth);
 
   const [enrolledChallenges, setEnrolledChallenges] = useState(null);
@@ -33,6 +39,8 @@ const EnrolledChallenges = () => {
   return (
     <>
       <div className="text-3xl text-richblack-500">Enrolled Challenges</div>
+      <Calendar tileContent={TileContent}/>
+      
       {!enrolledChallenges ? (
         <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
           <div className="spinner"></div>
