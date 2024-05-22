@@ -45,11 +45,6 @@ exports.updateProfile = async (req, res) => {
 
 exports.deleteAccount = async (req, res) => {
 	try {
-		// TODO: Find More on Job Schedule
-		// const job = schedule.scheduleJob("10 * * * * *", function () {
-		// 	console.log("The answer to life, the universe, and everything!");
-		// });
-		// console.log(job);
 		const id = req.user.id;
 		const user = await User.findById({ _id: id });
 		if (!user) {
@@ -59,14 +54,16 @@ exports.deleteAccount = async (req, res) => {
 			});
 		}
 		// Delete Assosiated Profile with the User
-		await Profile.findByIdAndDelete({ _id: user.additionalDetails });
-		// TODO: Unenroll User From All the Enrolled Courses
+		await Profile.findByIdAndDelete({
+			_id: new mongoose.Types.ObjectId(user.additionalDetails),
+		  })
 		// Now Delete User
 		await User.findByIdAndDelete({ _id: id });
 		res.status(200).json({
 			success: true,
 			message: "User deleted successfully",
 		});
+		await ChallengesProgress.deleteMany({ userId: id })
 	} catch (error) {
 		console.log(error);
 		res
@@ -127,7 +124,7 @@ exports.updateDisplayPicture = async (req, res) => {
 exports.getEnrolledChallenges = async (req, res) => {
 	try {
 		const userId = req.user.id
-		const userDetails = await User.findOne({
+		let userDetails = await User.findOne({
 			_id: userId,
 		})
 			.populate({
@@ -142,25 +139,41 @@ exports.getEnrolledChallenges = async (req, res) => {
 			.exec()
 
 		const arr = []
+		const progress=[]
 		let c = 0;
-		userDetails.enrolledChallenges.forEach((r) => {
-			let totalDurationInSeconds = 0
-			r.taskContent.forEach((content) => {
-				content.subSection.forEach((subSection) => {
-					let timeDurationInSeconds = 0
-					let [numericValue, unit] = []
-					if (subSection.timeDuration)
-						[numericValue, unit] = subSection.timeDuration.split(' ');
-					if (unit === 'min')
-						timeDurationInSeconds += parseInt(numericValue, 10) * 60;
-					else if (unit === 'hr')
-						timeDurationInSeconds += parseInt(numericValue, 10) * 3600;
-					totalDurationInSeconds += timeDurationInSeconds
-				})
-			})
-			const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
-			arr[c++] = totalDuration
-		})
+		let d=0;
+
+	userDetails = userDetails.toObject()
+    var SubsectionLength = 0
+    for (var i = 0; i < userDetails.enrolledChallenges.length; i++) {
+      let totalDurationInSeconds = 0
+      SubsectionLength = 0
+      for (var j = 0; j < userDetails.enrolledChallenges[i].taskContent.length; j++) {
+        totalDurationInSeconds += userDetails.enrolledChallenges[i].taskContent[
+          j
+        ].subSection.reduce((acc, curr) => acc + parseInt(curr.timeDuration), 0)
+        SubsectionLength +=
+          userDetails.enrolledChallenges[i].taskContent[j].subSection.length
+      }
+	  	const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
+		arr[c++] = totalDuration
+		let taskProgressCount = await ChallengesProgress.findOne({
+			challengeId: userDetails.enrolledChallenges[i]._id,
+			userId: userId,
+		  })
+      taskProgressCount = taskProgressCount?.completedSubsection.length
+      if (SubsectionLength === 0) {
+        progress[d++] = 100
+      } else {
+        // To make it up to 2 decimal point
+        const multiplier = Math.pow(10, 2)
+        progress[d++] =
+          Math.round(
+            (taskProgressCount / SubsectionLength) * 100 * multiplier
+          ) / multiplier
+      }
+    }
+
 		if (!userDetails) {
 			return res.status(400).json({
 				success: false,
@@ -169,7 +182,7 @@ exports.getEnrolledChallenges = async (req, res) => {
 		}
 		return res.status(200).json({
 			success: true,
-			data: { userDetails, arr }
+			data: { userDetails, arr, progress }
 		})
 	} catch (error) {
 		return res.status(500).json({

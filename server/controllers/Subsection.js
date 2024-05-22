@@ -1,14 +1,12 @@
 // Import necessary modules
 const Section = require("../models/Section");
 const SubSection = require("../models/SubSection");
-const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 // Create a new sub-section for a given section
 exports.createSubSection = async (req, res) => {
   try {
     // Extract necessary information from the request body
     const { sectionId, title, description, timeDuration } = req.body
-    // const video = req.files.video
 
     // Check if all necessary fields are provided
     if (!sectionId || !title || !description || !timeDuration) {
@@ -17,26 +15,17 @@ exports.createSubSection = async (req, res) => {
         .json({ success: false, message: "All Fields are Required" })
     }
 
-
-
-    // console.log(video)
-
-    // Upload the video file to Cloudinary
-    // const uploadDetails = await uploadImageToCloudinary(
-    //   video,
-    //   process.env.FOLDER_NAME
-    // )
-
-
-
-    // console.log(uploadDetails)
+    const [value,unit]=timeDuration.split(' ')
+    let time=parseInt(value);
+    if(unit==='min')
+      time=time*60;
+    else
+      time=time*3600;
     // Create a new sub-section with the necessary information
     const SubSectionDetails = await SubSection.create({
       title: title,
-      // timeDuration: `${uploadDetails.duration}`,
       description: description,
-      timeDuration: timeDuration
-      // videoUrl: uploadDetails.secure_url,
+      timeDuration: time
     })
 
     // Update the corresponding section with the newly created sub-section
@@ -78,18 +67,16 @@ exports.updateSubSection = async (req, res) => {
     if (description !== undefined) {
       subSection.description = description
     }
+
     if (timeDuration !== undefined) {
-      subSection.timeDuration = timeDuration
+      const [value,unit]=timeDuration.split(' ')
+      let time=parseInt(value);
+      if(unit==='min')
+        time=time*60;
+      else
+        time=time*3600;
+      subSection.timeDuration = time
     }
-    // if (req.files && req.files.video !== undefined) {
-    //   const video = req.files.video
-    //   const uploadDetails = await uploadImageToCloudinary(
-    //     video,
-    //     process.env.FOLDER_NAME
-    //   )
-    //   subSection.videoUrl = uploadDetails.secure_url
-    //   subSection.timeDuration = `${uploadDetails.duration}`
-    // }
 
     await subSection.save()
     const updatedSection = await Section.findById(sectionId).populate("subSection")

@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 
 const ChallengesProgress = new mongoose.Schema({
 
-///check for challnegeid or taskid?
-
-	challengeID: {
+	challengeId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Task",
 	},
