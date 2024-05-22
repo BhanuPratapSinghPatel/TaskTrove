@@ -35,7 +35,7 @@ export default function SubSectionModal({
   const [loading, setLoading] = useState(false)
   const { token } = useSelector((state) => state.auth)
   const { task } = useSelector((state) => state.task)
-  const durations = ["5 min", "10 min", "15 min", "30 min", "1 hr", "2 hr", "5 hr", "10 hr"]
+  const durations = ["1 min", "5 min", "10 min", "15 min", "30 min", "1 hr", "2 hr", "5 hr", "10 hr"]
 
   useEffect(() => {
     if (view || edit) {

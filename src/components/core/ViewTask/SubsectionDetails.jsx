@@ -1,170 +1,156 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { markSubsectionAsComplete } from '../../../services/operations/taskDetailsAPI';
 import { updateCompletedSubsections } from '../../../slices/viewTaskSlice';
-// import { Player } from 'video-react';
-// import '~video-react/dist/video-react.css';
-// import {AiFillPlayCircle} from "react-icons/ai"
-import IconBtn from '../../common/IconBtn';
-
 import { useTimer } from 'react-timer-hook';
+import IconBtn from '../../common/IconBtn';
 
 const SubsectionDetails = () => {
 
-    const { taskId, sectionId, subSectionId } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const location = useLocation();
-    const timerRef = useRef();
-    const { token } = useSelector((state) => state.auth);
-    const { taskSectionData, taskEntireData, completedSubsections } = useSelector((state) => state.viewTask);
+  const {taskId, sectionId, subSectionId} = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const {token} = useSelector((state)=>state.auth);
+  const {taskSectionData, taskEntireData, completedSubsections} = useSelector((state)=>state.viewTask);
 
-    const [subsectionData, setSubsectionData] = useState([]);
-    const [subsectionEnded, setSubsectionEnded] = useState(false);
-    const [loading, setLoading] = useState(false);
+  const [subsectionData, setSubsectionData] = useState([]);
+  const [subsectionEnded, setSubsectionEnded] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-
-        const setSubsectionSpecificDetails = async () => {
-            if (!taskSectionData.length)
-                return;
-            if (!taskId && !sectionId && !subSectionId) {
-                navigate("/dashboard/enrolled-challenges");
-            }
-            else {
-                //let's assume k all 3 fields are present
-
-                const filteredData = taskSectionData.filter(
-                    (task) => task._id === sectionId
-                )
-
-                const filteredSubsectionData = filteredData?.[0].subSection.filter(
-                    (data) => data._id === subSectionId
-                )
-
-                setSubsectionData(filteredSubsectionData[0]);
-                setSubsectionEnded(false);
-
-            }
+  useEffect(()=> {
+    const setSubsectionSpecificDetails = async() => {
+        if(!taskSectionData.length)
+            return;
+        if(!taskId && !sectionId && !subSectionId) {
+            navigate("/dashboard/enrolled-challenges");
         }
-        setSubsectionSpecificDetails();
+        else {
+            //if all 3 fields are present
 
-    }, [taskSectionData, taskEntireData, location.pathname])
+            const filteredData = taskSectionData.filter(
+                (task) => task._id === sectionId
+            )
 
-    const isFirstSubsection = () => {
-        const currentSectionIndex = taskSectionData.findIndex(
-            (data) => data._id === sectionId
-        )
+            const filteredSubsectionData = filteredData?.[0].subSection.filter(
+                (data) => data._id === subSectionId
+            )
 
-        const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
-            (data) => data._id === subSectionId
-        )
-        if (currentSectionIndex === 0 && currentSubSectionIndex === 0) {
+            setSubsectionData(filteredSubsectionData[0]);
+            setSubsectionEnded(false);
+        }
+    }
+    setSubsectionSpecificDetails();
+
+  },[taskSectionData, taskEntireData, location.pathname])
+
+  const isFirstSubsection = () => {
+    const currentSectionIndex = taskSectionData.findIndex(
+        (data) => data._id === sectionId
+    )
+
+    const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
+        (data) => data._id === subSectionId
+    )
+    if(currentSectionIndex === 0 && currentSubSectionIndex === 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+  } 
+
+  const isLastSubsection = () => {
+    const currentSectionIndex = taskSectionData.findIndex(
+        (data) => data._id === sectionId
+    )
+
+    const noOfSubSections = taskSectionData[currentSectionIndex].subSection.length;
+
+    const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
+        (data) => data._id === subSectionId
+    )
+
+    if(currentSectionIndex === taskSectionData.length - 1 &&
+        currentSubSectionIndex === noOfSubSections - 1) {
             return true;
         }
-        else {
-            return false;
-        }
+    else {
+        return false;
     }
 
-    const isLastSubsection = () => {
-        const currentSectionIndex = taskSectionData.findIndex(
-            (data) => data._id === sectionId
-        )
 
-        const noOfSubSections = taskSectionData[currentSectionIndex].subSection.length;
+  }
 
-        const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
-            (data) => data._id === subSectionId
-        )
+  const goToNextSubsection = () => {
+    const currentSectionIndex = taskSectionData.findIndex(
+        (data) => data._id === sectionId
+    )
 
-        if (currentSectionIndex === taskSectionData.length - 1 &&
-            currentSubSectionIndex === noOfSubSections - 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    const noOfSubSections = taskSectionData[currentSectionIndex].subSection.length;
 
+    const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
+        (data) => data._id === subSectionId
+    )
 
+    if(currentSubSectionIndex !== noOfSubSections - 1) {
+        //same section, next subsection
+        const nextSubSectionId = taskSectionData[currentSectionIndex].subSection[currentSubSectionIndex + 1]._id;
+        //go to next subsection
+        navigate(`/view-challenge/${taskId}/section/${sectionId}/sub-section/${nextSubSectionId}`)
     }
-
-    const goToNextSubsection = () => {
-        const currentSectionIndex = taskSectionData.findIndex(
-            (data) => data._id === sectionId
-        )
-
-        const noOfSubSections = taskSectionData[currentSectionIndex].subSection.length;
-
-        const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
-            (data) => data._id === subSectionId
-        )
-
-        if (currentSubSectionIndex !== noOfSubSections - 1) {
-            //same section ki next video me jao
-            const nextSubSectionId = taskSectionData[currentSectionIndex].subSection[currentSectionIndex + 1]._id;
-            //next video pr jao
-            navigate(`/view-challenge/${taskId}/section/${sectionId}/sub-section/${nextSubSectionId}`)
-        }
-        else {
-            //different section ki first video
-            const nextSectionId = taskSectionData[currentSectionIndex + 1]._id;
-            const nextSubSectionId = taskSectionData[currentSectionIndex + 1].subSection[0]._id;
-            ///iss voide par jao 
-            navigate(`/view-challenge/${taskId}/section/${nextSectionId}/sub-section/${nextSubSectionId}`)
-        }
+    else {
+        //different section, first subsection
+        const nextSectionId = taskSectionData[currentSectionIndex + 1]._id;
+        const nextSubSectionId = taskSectionData[currentSectionIndex + 1].subSection[0]._id;
+        ///go to this subsection 
+        navigate(`/view-challenge/${taskId}/section/${nextSectionId}/sub-section/${nextSubSectionId}`)
     }
+  }
 
-    const goToPrevVideo = () => {
+  const goToPrevSubsection = () => {
 
-        const currentSectionIndex = taskSectionData.findIndex(
-            (data) => data._id === sectionId
-        )
+    const currentSectionIndex = taskSectionData.findIndex(
+        (data) => data._id === sectionId
+    )
 
-        const noOfSubSections = taskSectionData[currentSectionIndex].subSection.length;
+    const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
+        (data) => data._id === subSectionId
+    )
 
-        const currentSubSectionIndex = taskSectionData[currentSectionIndex].subSection.findIndex(
-            (data) => data._id === subSectionId
-        )
-
-        if (currentSubSectionIndex != 0) {
-            //same section , prev video
-            const prevSubSectionId = taskSectionData[currentSectionIndex].subSection[currentSubSectionIndex - 1];
-            //iss video par chalge jao
-            navigate(`/view-challenge/${taskId}/section/${sectionId}/sub-section/${prevSubSectionId}`)
-        }
-        else {
-            //different section , last video
-            const prevSectionId = taskSectionData[currentSectionIndex - 1]._id;
-            const prevSubSectionLength = taskSectionData[currentSectionIndex - 1].subSection.length;
-            const prevSubSectionId = taskSectionData[currentSectionIndex - 1].subSection[prevSubSectionLength - 1]._id;
-            //iss video par chalge jao
-            navigate(`/view-challenge/${taskId}/section/${prevSectionId}/sub-section/${prevSubSectionId}`)
-
-        }
-
+    if(currentSubSectionIndex !== 0 ) {
+        //same section , prev subsection
+        const prevSubSectionId = taskSectionData[currentSectionIndex].subSection[currentSubSectionIndex - 1]._id;
+        //go to this subsection
+        navigate(`/view-challenge/${taskId}/section/${sectionId}/sub-section/${prevSubSectionId}`)
+    }
+    else {
+        //different section , last subsection
+        const prevSectionId = taskSectionData[currentSectionIndex - 1]._id;
+        const prevSubSectionLength = taskSectionData[currentSectionIndex - 1].subSection.length;
+        const prevSubSectionId = taskSectionData[currentSectionIndex - 1].subSection[prevSubSectionLength - 1]._id;
+        //go to this subsection
+        navigate(`/view-challenge/${taskId}/section/${prevSectionId}/sub-section/${prevSubSectionId}`)
 
     }
 
-    const handleSubsectionCompletion = async () => {
 
-        ///dummy code, baad me we will replace it witht the actual call
-        setLoading(true);
-        //PENDING - > Task Progress PENDING
-        const res = await markSubsectionAsComplete({ taskId: taskId, subSectionId: subSectionId }, token);
-        //state update
-        if (res) {
-            dispatch(updateCompletedSubsections(subSectionId));
-        }
-        setLoading(false);
+  }
 
+  const handleSubsectionCompletion = async() => {
+
+    setLoading(true);
+    const res = await markSubsectionAsComplete({taskId: taskId, subSectionId: subSectionId}, token);
+    //state update
+    if(res) {
+        dispatch(updateCompletedSubsections(subSectionId)); 
     }
+    setLoading(false);
 
-    
-function MyTimer({ expiryTimestamp }) {
+  }
+  function MyTimer({ expiryTimestamp, autoStart }) {
     const {
-      totalSeconds,
       seconds,
       minutes,
       hours,
@@ -174,113 +160,98 @@ function MyTimer({ expiryTimestamp }) {
       pause,
       resume,
       restart,
-    } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
-  
+    } = useTimer({ expiryTimestamp,onExpire: () => setSubsectionEnded(true), autoStart });
     return (
-        <div style={{textAlign: 'center'}}>
-          <h1>react-timer-hook </h1>
-          <p>Timer Demo</p>
+        <div style={{textAlign: 'center'}} className='mt-2 flex items-center justify-center flex-col'>
           <div style={{fontSize: '100px'}}>
             <span>{days}</span>:<span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span>
           </div>
-          <p>{isRunning ? 'Running' : 'Not running'}</p>
-          <button onClick={start}>Start</button>
-          <button onClick={pause}>Pause</button>
-          <button onClick={resume}>Resume</button>
-          <button onClick={() => {
-            // Restarts to 5 minutes timer
+          <p className='font-semibold'>{isRunning ? 'Timer Is Running...' : 'Resume Your Progress!'}</p>
+          <div className='flex items-center justify-center'>
+          <IconBtn text="Start" onclick={start} customClasses="m-2 p-2"/>
+          <IconBtn text="Pause" onclick={pause} customClasses="m-2 p-2"/>
+          <IconBtn text="Resume" onclick={resume} customClasses="m-2 p-2"/>
+          <IconBtn text="Restart" onclick={() => {
             const time = new Date();
-            time.setSeconds(time.getSeconds() + 300);
+            time.setSeconds(time.getSeconds() + parseInt(subsectionData.timeDuration));
             restart(time)
-          }}>Restart</button>
+          }} customClasses="m-2 p-2"/>
+          {subsectionEnded && (<div style={{
+                backgroundImage:
+                  "linear-gradient(to top, rgb(0, 0, 0), rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.1)",
+              }} className="full absolute inset-0 z-[100] grid h-full place-content-center font-inter">
+                            {
+                                !completedSubsections.includes(subSectionId) && (
+                                    <IconBtn 
+                                        disabled={loading}
+                                        onclick={() => handleSubsectionCompletion()}
+                                        text={!loading ? "Mark As Completed" : "Loading..."}
+                                        customClasses="text-xl max-w-max px-4 mx-auto"
+                                    />
+                                )
+                            }
+
+                           <IconBtn 
+                                disabled={loading}
+                                onclick={
+                                  () => {
+                                    const time = new Date();
+                                    time.setSeconds(time.getSeconds() + parseInt(subsectionData.timeDuration));
+                                    restart(time)
+                                    setSubsectionEnded(false)
+                                  }}
+                                text="Begin Again!"
+                                customClasses="text-xl max-w-max px-4 mx-auto mt-2"
+                            />
+
+                            <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
+                                {!isFirstSubsection() && (
+                                    <button
+                                    disabled={loading}
+                                    onClick={goToPrevSubsection}
+                                    className='blackButton'
+                                    >
+                                        Prev
+                                    </button>
+                                )}
+                                {!isLastSubsection() && (
+                                    <button
+                                    disabled={loading}
+                                    onClick={goToNextSubsection}
+                                    className='blackButton'>
+                                        Next
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+          </div>
         </div>
       );
-    }  
+    }
     const time = new Date();
-  time.setSeconds(time.getSeconds() + 600);
-        return (
+    time.setSeconds(time.getSeconds() +parseInt(subsectionData.timeDuration));
+  return (
+   
+    <div>
+      {
+        !subsectionData ? (<div>
+            No Data Found
+            </div>)
+        : (
             <div>
-                {
-                    !subsectionData ? (<div>
-                        No Data Found
-                    </div>)
-                        : (
-                            // <Player
-                            //     ref = {playerRef}
-                            //     aspectRatio="16:9"
-                            //     playsInline
-                            //     onEnded={() => setVideoEnded(true)}
-                            //     src={videoData?.videoUrl}
-                            //      >
-
-                            //     <AiFillPlayCircle  />
-
-                            //     {
-                            //         videoEnded && (
-                            //             <div>
-                            //                 {
-                            //                     !completedLectures.includes(subSectionId) && (
-                            //                         <IconBtn 
-                            //                             disabled={loading}
-                            //                             onclick={() => handleLectureCompletion()}
-                            //                             text={!loading ? "Mark As Completed" : "Loading..."}
-                            //                         />
-                            //                     )
-                            //                 }
-
-                            //                 <IconBtn 
-                            //                     disabled={loading}
-                            //                     onclick={() => {
-                            //                         if(playerRef?.current) {
-                            //                             playerRef.current?.seek(0);
-                            //                             setVideoEnded(false);
-                            //                         }
-                            //                     }}
-                            //                     text="Rewatch"
-                            //                     customClasses="text-xl"
-                            //                 />
-
-                            //                 <div>
-                            //                     {!isFirstVideo() && (
-                            //                         <button
-                            //                         disabled={loading}
-                            //                         onClick={goToPrevVideo}
-                            //                         className='blackButton'
-                            //                         >
-                            //                             Prev
-                            //                         </button>
-                            //                     )}
-                            //                     {!isLastVideo() && (
-                            //                         <button
-                            //                         disabled={loading}
-                            //                         onClick={goToNextVideo}
-                            //                         className='blackButton'>
-                            //                             Next
-                            //                         </button>
-                            //                     )}
-                            //                 </div>
-                            //             </div>
-                            //         )
-                            //     }
-                            // </Player>
-                            <div>
-                                Timer
-                                <div> 
-                                <div>
-      <MyTimer expiryTimestamp={time} />
-    </div>
-                                </div>
-                            </div>
-                        )
-                }
-                <h1 className="mt-4 text-3xl font-semibold">
-                    {subsectionData?.title}
-                </h1>
-                <p className="pt-2 pb-6">
-                    {subsectionData?.description}
-                </p>
+            <MyTimer expiryTimestamp={time} autoStart={false}/>
             </div>
         )
-    }
+      }
+      <h1 className="mt-4 text-3xl font-bold">
+        Title:&nbsp;{subsectionData?.title}
+      </h1>
+      <p className="pt-2 pb-6 font-semibold">
+        Description:&nbsp;{subsectionData?.description}
+      </p>
+    </div>
+  )
+}
 
-    export default SubsectionDetails
+export default SubsectionDetails

@@ -43,7 +43,9 @@ const {
   getAverageRating,
   getAllRating,
 } = require("../controllers/RatingAndReview")
-
+const {
+  updateTaskProgress,
+} = require("../controllers/TaskProgress")
 // Importing Middlewares
 const { auth,isStudent} = require("../middlewares/auth")
 
@@ -71,6 +73,7 @@ router.post("/editTask", auth, isStudent, editTask)
 // Get Details for a Specific Task
 router.post("/gettaskDetails", gettaskDetails)
 router.get("/getStudentTask",auth,isStudent,getStudentTask);
+router.post("/updateTaskProgress", auth, isStudent, updateTaskProgress)
 router.delete("/deleteTask",deleteTask);
 router.post("/getFullTaskDetails", auth, getFullTaskDetails)
 // ********************************************************************************************************

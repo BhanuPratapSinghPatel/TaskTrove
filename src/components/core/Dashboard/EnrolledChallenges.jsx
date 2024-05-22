@@ -16,8 +16,11 @@ const EnrolledChallenges = () => {
 
   const [enrolledChallenges, setEnrolledChallenges] = useState(null);
   const [duration, setDuration] = useState(null)
+  const [progress, setProgress] = useState(null)
   const navigate = useNavigate()
   let c = 0;
+  let d = 0;
+  let x = 0;
 
   const getEnrolledChallenges = async () => {
     try {
@@ -25,6 +28,7 @@ const EnrolledChallenges = () => {
       const filterPublishTask = response.userDetails.enrolledChallenges.filter((ele) => ele.status !== "Draft")
       setEnrolledChallenges(filterPublishTask);
       setDuration(response.arr)
+      setProgress(response.progress)
     }
     catch (error) {
       console.log("Unable to Fetch Enrolled Challenges");
@@ -89,9 +93,9 @@ const EnrolledChallenges = () => {
               </div>
               <div className="w-1/4 px-2 py-3">{duration[c++]}</div>
               <div className="flex w-1/5 flex-col gap-2 px-2 py-3">
-                <p>Progress: {challenge.progressPercentage || 0}%</p>
+                <p>Progress: {progress[d++]||0}%</p>
                 <ProgressBar
-                  completed={challenge.progressPercentage || 0}
+                  completed={progress[x++]||0}
                   height="8px"
                   isLabelVisible={false}
                 />

@@ -1,10 +1,9 @@
-const Task = require("../models/Task");//challenge,tags also kya task ke jagah task hoga ya challenegs
+const Task = require("../models/Task");
 const Section = require("../models/Section");
 const ChallengesProgress = require("../models/ChallengesProgress")
 const SubSection = require("../models/SubSection")
 const Category = require("../models/Category");
 const User = require("../models/User");
-const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const { convertSecondsToDuration } = require("../utils/convertSeconds");
 // Function to create a new task
 
@@ -18,26 +17,18 @@ exports.createTask = async (req, res) => {
 		// Get all required fields from request body
 		let {
 			taskName,//challenge name
-			taskDescription,//chalenge description optional
+			taskDescription,//challenge description optional
 			whatYouWillLearn,//can be used when predefined
-
-			// tag: _tag,
 			category,
 			status
 
 		} = req.body;
-
-		// Get thumbnail image from request files
-		// const thumbnail = req.files.thumbnailImage;
 
 		// Check if any of the required fields are missing
 		if (
 			!taskName ||
 			!taskDescription ||
 			!whatYouWillLearn ||
-
-			// !_tag ||
-
 			!category
 		) {
 			return res.status(400).json({
@@ -48,7 +39,7 @@ exports.createTask = async (req, res) => {
 		if (!status || status === undefined) {
 			status = "Draft";
 		}
-		//Check if the user is an instructor
+		//Check if the user exists
 		const userDetails = await User.findById(userId, {
 			accountType: "Student",
 		});
@@ -60,7 +51,7 @@ exports.createTask = async (req, res) => {
 			});
 		}
 
-		// Check if the tag given is valid
+		// Check if the category given is valid
 		const categoryDetails = await Category.findById(category);
 		if (!categoryDetails) {
 			return res.status(404).json({
@@ -68,27 +59,16 @@ exports.createTask = async (req, res) => {
 				message: "Category Details Not Found",
 			});
 		}
-		// Upload the Thumbnail to Cloudinary
-		// const thumbnailImage = await uploadImageToCloudinary(
-		// 	thumbnail,
-		// 	process.env.FOLDER_NAME
-		// );
-		// console.log(thumbnailImage);
 		// Create a new task with the given details
 		const newTask = await Task.create({
 			taskName,
 			taskDescription,
-			//yaha change keye check krna hoga ye koi problem nhi krega to
 			instructor: userDetails._id,
 			whatYouWillLearn: whatYouWillLearn,
-
-			// tag: _tag,
 			category: categoryDetails._id,
-			// thumbnail: thumbnailImage.secure_url,
 			studentsEnrolled: userDetails._id,
 			status: status,
 			createdAt: Date.now()
-			// instructions: instructions,
 		});
 
 		// Add the new task to the User Schema of the Instructor
@@ -209,40 +189,6 @@ exports.gettaskDetails = async (req, res) => {
 	}
 }
 
-
-
-// exports.getTaskDetails = async (req, res) => {
-// 	try {
-// 	  const { taskId } = req.body
-// 	  const taskDetails = await Task.findOne({
-// 		_id: taskId,
-// 	  })
-// 		.populate({
-// 		  path: "instructor",
-// 		  populate: {
-// 			path: "additionalDetails",
-// 		  },
-// 		})
-// 		.populate("category")
-// 		.populate("ratingAndReviews")
-// 		.populate({
-// 		  path: "taskContent",
-// 		  populate: {
-// 			path: "subSection",
-// 			select: "-videoUrl",
-// 		  },
-// 		})
-// 		.exec()
-
-// 	  if (!courseDetails) {
-// 		return res.status(400).json({
-// 		  success: false,
-// 		  message: Could not find course with id: ${courseId},
-// 		})
-// 	  }
-
-
-
 exports.editTask = async (req, res) => {
 
 	try {
@@ -251,27 +197,6 @@ exports.editTask = async (req, res) => {
 			return res.status(404).json({ error: "Task not found" })
 		}
 
-		// If Thumbnail Image is found, update it
-		//   if (req.files) {
-		// 	console.log("thumbnail update")
-		// 	const thumbnail = req.files.thumbnailImage
-		// 	const thumbnailImage = await uploadImageToCloudinary(
-		// 	  thumbnail,
-		// 	  process.env.FOLDER_NAME
-		// 	)
-		// 	course.thumbnail = thumbnailImage.secure_url
-		//   }
-
-		// Update only the fields that are present in the request body
-		//   for (const key in updates) {
-		// 	if (updates.hasOwnProperty(key)) {
-		// 	  if (key === "tag" || key === "instructions") {
-		// 		course[key] = JSON.parse(updates[key])
-		// 	  } else {
-		// 		course[key] = updates[key]
-		// 	  }
-		// 	}
-		//   }
 		if (req.body.taskName !== undefined)
 			task.taskName = req.body.taskName
 		if (req.body.taskDescription !== undefined)
@@ -339,15 +264,7 @@ exports.getStudentTask = async (req, res) => {
 			let totalDurationInSeconds = 0
 			r.taskContent.forEach((content) => {
 				content.subSection.forEach((subSection) => {
-					let timeDurationInSeconds = 0
-					let [numericValue, unit] = []
-					if (subSection.timeDuration)
-						[numericValue, unit] = subSection.timeDuration.split(' ');
-					if (unit === 'min')
-						timeDurationInSeconds += parseInt(numericValue, 10) * 60;
-					else if (unit === 'hr')
-						timeDurationInSeconds += parseInt(numericValue, 10) * 3600;
-					totalDurationInSeconds += timeDurationInSeconds
+					totalDurationInSeconds += parseInt(subSection.timeDuration)
 				})
 			})
 			const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
@@ -425,9 +342,6 @@ exports.deleteTask = async (req, res) => {
 	}
 }
 
-
-
-
 exports.getFullTaskDetails = async (req, res) => {
 	try {
 		const { taskId } = req.body
@@ -452,7 +366,7 @@ exports.getFullTaskDetails = async (req, res) => {
 			.exec()
 
 		let taskProgressCount = await ChallengesProgress.findOne({
-			taskID: taskId,
+			challengeId: taskId,
 			userId: userId,
 		})
 
@@ -472,15 +386,7 @@ exports.getFullTaskDetails = async (req, res) => {
 		let totalDurationInSeconds = 0
 		taskDetails.taskContent.forEach((content) => {
 			content.subSection.forEach((subSection) => {
-				let timeDurationInSeconds = 0
-				let [numericValue, unit] = []
-				if (subSection.timeDuration)
-					[numericValue, unit] = subSection.timeDuration.split(' ');
-				if (unit === 'min')
-					timeDurationInSeconds += parseInt(numericValue, 10) * 60;
-				else if (unit === 'hr')
-					timeDurationInSeconds += parseInt(numericValue, 10) * 3600;
-				totalDurationInSeconds += timeDurationInSeconds
+				totalDurationInSeconds += parseInt(subSection.timeDuration)
 			})
 		})
 
